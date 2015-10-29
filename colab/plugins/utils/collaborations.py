@@ -8,7 +8,6 @@ from django.utils.translation import ugettext as _
 from django.conf import settings
 
 from colab.plugins.utils.models import Collaboration
-from colab.super_archives.utils.collaborations import (get_visible_threads)
 
 
 def get_collaboration_data(logged_user, filter_by_user=None):
@@ -24,8 +23,13 @@ def get_collaboration_data(logged_user, filter_by_user=None):
     if count_types is None:
         populate_count_types = True
         count_types = OrderedDict()
+        # TODO: implement with superarchives
+        # visible_threads = get_visible_threads(logged_user, filter_by_user)
+        # count_types[_('Emails')] = len(visible_threads)
 
-        count_types[_('Emails')] = len(messages)
+    # TODO: implement with superarchives
+    # messages = get_visible_threads(logged_user, filter_by_user)
+    messages = []
 
     latest_results.extend(messages)
 
