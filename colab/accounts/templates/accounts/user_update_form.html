@@ -28,7 +28,8 @@ $(function() {
 
   $('#add-email').on('click', function(event) {
     $.ajax({
-      url: "{% url 'archive_email_view' %}",
+	  // TODO: implement it moving email model to colab, instead of superarchives
+      url: '', //{ % url 'archive_email_view' % },
       type: 'post',
       data: { email: $('#new_email').val(), user: '{{ user_.pk }}' },
       beforeSend: function(xhr, settings) {
@@ -51,7 +52,8 @@ $(function() {
   $('.delete-email').on('click', function(event) {
     var $email_block = $(event.target).parent().parent();
     $.ajax({
-      url: "{% url 'archive_email_view' %}",
+	  // TODO: implement it moving email model to colab, instead of superarchives
+      url: '', //{ % url 'archive_email_view' % },
       type: 'delete',
       data: {
         email: $('.email-address', $email_block).text(),
@@ -71,7 +73,8 @@ $(function() {
   $('.verify-email').on('click', function(event) {
     var $email_block = $(event.target).parent().parent();
     $.ajax({
-      url: "{% url 'archive_email_validation_view' %}",
+	  // TODO: implement it moving email model to colab, instead of superarchives
+      url: '', //{ % url 'archive_email_validation_view' % },
       type: 'post',
       data: {
         email: $('.email-address', $email_block).text(),
@@ -98,7 +101,8 @@ $(function() {
   $('.set-primary').on('click', function(event) {
     var $email_block = $(event.target).parent().parent();
     $.ajax({
-      url: "{% url 'archive_email_view' %}",
+	  // TODO: implement it moving email model to colab, instead of superarchives
+      url: '', //{ % url 'archive_email_validation_view' % },
       type: 'update',
       data: {
         email: $('.email-address', $email_block).text(),
