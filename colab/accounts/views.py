@@ -1,22 +1,29 @@
 # encoding: utf-8
 from collections import OrderedDict
 
+import smtplib
+import logging
+import urlparse
+import requests
+
+from django import http
 from django.contrib import messages
-from django.db.models import Count
 from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.db import IntegrityError
+from django.db.models import Count
+from django.http import Http404
+from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
 from django.shortcuts import render, redirect
-from django.core.urlresolvers import reverse
-from django.core.exceptions import PermissionDenied
-from django.views.generic import DetailView, UpdateView
-from django.http import Http404
+from django.views.generic import DetailView, UpdateView, View
 
 from colab.search.utils import get_collaboration_data
-from colab.accounts.models import User
-
-from .forms import (ColabSetUsernameForm, ListsForm, UserUpdateForm)
-from .utils import mailman
-
+from colab.accounts.models import (User, EmailAddress, EmailAddressValidation)
+from colab.accounts.forms import (ColabSetUsernameForm, UserUpdateForm)
+from colab.accounts.utils.email import send_verification_email
 
 
 class UserProfileBaseMixin(object):
@@ -88,6 +95,139 @@ class UserProfileDetailView(UserProfileBaseMixin, DetailView):
         return super(UserProfileDetailView, self).get_context_data(**context)
 
 
+class EmailView(View):
+
+    http_method_names = [u'head', u'get', u'post', u'delete', u'update']
+
+    def get(self, request, key):
+        """Validate an email with the given key"""
+
+        try:
+            email_val = EmailAddressValidation.objects.get(validation_key=key)
+        except EmailAddressValidation.DoesNotExist:
+            messages.error(request, _('The email address you are trying to '
+                                      'verify either has already been verified'
+                                      ' or does not exist.'))
+            return redirect('/')
+
+        try:
+            email = EmailAddress.objects.get(address=email_val.address)
+        except EmailAddress.DoesNotExist:
+            email = EmailAddress(address=email_val.address)
+
+        if email.user and email.user.is_active:
+            messages.error(request, _('The email address you are trying to '
+                                      'verify is already an active email '
+                                      'address.'))
+            email_val.delete()
+            return redirect('/')
+
+        email.user = email_val.user
+        email.save()
+        email_val.delete()
+
+        user = User.objects.get(username=email.user.username)
+        user.is_active = True
+        user.save()
+
+        messages.success(request, _('Email address verified!'))
+        return redirect('user_profile', username=email_val.user.username)
+
+    @method_decorator(login_required)
+    def post(self, request, key):
+        """Create new email address that will wait for validation"""
+
+        email = request.POST.get('email')
+        user_id = request.POST.get('user')
+        if not email:
+            return http.HttpResponseBadRequest()
+
+        try:
+            EmailAddressValidation.objects.create(address=email,
+                                                  user_id=user_id)
+        except IntegrityError:
+            # 409 Conflict
+            #   duplicated entries
+            #   email exist and it's waiting for validation
+            return http.HttpResponse(status=409)
+
+        return http.HttpResponse(status=201)
+
+    @method_decorator(login_required)
+    def delete(self, request, key):
+        """Remove an email address, validated or not."""
+
+        request.DELETE = http.QueryDict(request.body)
+        email_addr = request.DELETE.get('email')
+        user_id = request.DELETE.get('user')
+
+        if not email_addr:
+            return http.HttpResponseBadRequest()
+
+        try:
+            email = EmailAddressValidation.objects.get(address=email_addr,
+                                                       user_id=user_id)
+        except EmailAddressValidation.DoesNotExist:
+            pass
+        else:
+            email.delete()
+            return http.HttpResponse(status=204)
+
+        try:
+            email = EmailAddress.objects.get(address=email_addr,
+                                             user_id=user_id)
+        except EmailAddress.DoesNotExist:
+            raise http.Http404
+
+        email.user = None
+        email.save()
+        return http.HttpResponse(status=204)
+
+    @method_decorator(login_required)
+    def update(self, request, key):
+        """Set an email address as primary address."""
+
+        request.UPDATE = http.QueryDict(request.body)
+
+        email_addr = request.UPDATE.get('email')
+        user_id = request.UPDATE.get('user')
+        if not email_addr:
+            return http.HttpResponseBadRequest()
+
+        try:
+            email = EmailAddress.objects.get(address=email_addr,
+                                             user_id=user_id)
+        except EmailAddress.DoesNotExist:
+            raise http.Http404
+
+        email.user.email = email_addr
+        email.user.save()
+        return http.HttpResponse(status=204)
+
+
+class EmailValidationView(View):
+
+    http_method_names = [u'post']
+
+    def post(self, request):
+        email_addr = request.POST.get('email')
+        user_id = request.POST.get('user')
+        try:
+            email = EmailAddressValidation.objects.get(address=email_addr,
+                                                       user_id=user_id)
+        except EmailAddressValidation.DoesNotExist:
+            raise http.Http404
+
+        try:
+            send_verification_email(email_addr, email.user,
+                                    email.validation_key)
+        except smtplib.SMTPException:
+            logging.exception('Error sending validation email')
+            return http.HttpResponseServerError()
+
+        return http.HttpResponse(status=204)
+
+
 def signup(request):
 
     if request.user.is_authenticated():
@@ -96,17 +236,20 @@ def signup(request):
 
     if request.method == 'GET':
         user_form = ColabSetUsernameForm()
-        lists_form = ListsForm()
+        # TODO: implement with superarchives plugin 
+        # lists_form = ListsForm()
+
 
         return render(request, 'accounts/user_create_form.html',
-                      {'user_form': user_form, 'lists_form': lists_form})
+                      {'user_form': user_form,})# 'lists_form': lists_form})
 
     user_form = ColabSetUsernameForm(request.POST)
-    lists_form = ListsForm(request.POST)
+    # TODO: do it with superarchives
+    #lists_form = ListsForm(request.POST)
 
-    if not user_form.is_valid() or not lists_form.is_valid():
+    if not user_form.is_valid():# or not lists_form.is_valid():
         return render(request, 'accounts/user_create_form.html',
-                      {'user_form': user_form, 'lists_form': lists_form})
+                      {'user_form': user_form,})# 'lists_form': lists_form})
 
     user = user_form.save(commit=False)
     user.needs_update = False
@@ -114,66 +257,13 @@ def signup(request):
     user.is_active = False
     user.save()
 
-    mailing_lists = lists_form.cleaned_data.get('lists')
-    mailman.update_subscription(user.email, mailing_lists)
+    # TODO: do it with superarchives
+    #mailing_lists = lists_form.cleaned_data.get('lists')
+    #mailman.update_subscription(user.email, mailing_lists)
 
     messages.success(request, _('Your profile has been created!'))
 
     return redirect('user_profile', username=user.username)
-
-
-class ManageUserSubscriptionsView(UserProfileBaseMixin, DetailView):
-    http_method_names = [u'get', u'post']
-    template_name = u'accounts/manage_subscriptions.html'
-
-    def get_object(self, *args, **kwargs):
-        obj = super(ManageUserSubscriptionsView, self).get_object(*args,
-                                                                  **kwargs)
-        if self.request.user != obj and not self.request.user.is_superuser:
-            raise PermissionDenied
-
-        return obj
-
-    def post(self, request, *args, **kwargs):
-        user = self.get_object()
-        for email in user.emails.values_list('address', flat=True):
-            lists = self.request.POST.getlist(email)
-            info_messages = user.update_subscription(email, lists)
-            for msg_type, message in info_messages:
-                show_message = getattr(messages, msg_type)
-                show_message(request, _(message))
-
-        return redirect('user_profile', username=user.username)
-
-    def get_context_data(self, **kwargs):
-        context = {}
-        context['membership'] = {}
-
-        user = self.get_object()
-        emails = user.emails.values_list('address', flat=True)
-        all_lists = mailman.all_lists()
-
-        for email in emails:
-            lists = []
-            lists_for_address = mailman.mailing_lists(address=email,
-                                                      names_only=True)
-            for mlist in all_lists:
-                if mlist.get('listname') in lists_for_address:
-                    checked = True
-                else:
-                    checked = False
-                lists.append((
-                    {'listname': mlist.get('listname'),
-                     'description': mlist.get('description')},
-                    checked
-                ))
-
-            context['membership'].update({email: lists})
-
-        context.update(kwargs)
-
-        return super(ManageUserSubscriptionsView,
-                     self).get_context_data(**context)
 
 
 def password_changed(request):
