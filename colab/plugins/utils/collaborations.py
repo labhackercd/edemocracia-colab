@@ -4,7 +4,6 @@ import inspect
 from collections import OrderedDict
 
 from django.core.cache import cache
-from django.utils.translation import ugettext as _
 from django.conf import settings
 
 from colab.plugins.utils.models import Collaboration

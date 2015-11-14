@@ -119,12 +119,11 @@ class User(AbstractUser):
 
     def facebook_link(self):
         return urlparse.urljoin('https://www.facebook.com', self.facebook)
-        # TODO: do with superarchives
+    # TODO: do with superarchives
     # def mailinglists(self):
-    #    return mailman.user_lists(self)
-
+    #     return mailman.user_lists(self)
     # def update_subscription(self, email, lists):
-    #    return mailman.update_subscription(email, lists)
+    #     return mailman.update_subscription(email, lists)
 
     def save(self, *args, **kwargs):
 
