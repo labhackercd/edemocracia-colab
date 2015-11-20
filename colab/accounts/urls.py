@@ -3,9 +3,10 @@ from django.conf.urls import patterns, url
 from django.contrib.auth import views as auth_views
 
 from colab.accounts.views import (UserProfileDetailView, UserProfileUpdateView,
-                                  EmailValidationView, EmailView, ColabSetPasswordForm,
-                                  ColabPasswordChangeForm)
+                                  EmailValidationView, EmailView)
 
+from colab.accounts.forms import (ColabSetPasswordForm,
+                                  ColabPasswordChangeForm)
 
 urlpatterns = patterns('',
     url(r'^login/?$', 'django.contrib.auth.views.login',

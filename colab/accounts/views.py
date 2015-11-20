@@ -17,7 +17,7 @@ from django.utils.translation import ugettext as _
 from django.shortcuts import render, redirect
 from django.views.generic import DetailView, UpdateView, View
 
-from colab.search.utils import get_collaboration_data
+from colab.plugins.utils.collaborations import get_collaboration_data
 from colab.accounts.models import (User, EmailAddress, EmailAddressValidation)
 from colab.accounts.forms import (ColabSetUsernameForm, UserUpdateForm)
 from colab.accounts.utils.email import send_verification_email
