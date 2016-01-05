@@ -225,7 +225,6 @@ def signup(request):
     if request.method == 'GET':
         user_form = ColabSetUsernameForm()
 
-
         return render(request, 'accounts/user_create_form.html',
                       {'user_form': user_form, })
 
