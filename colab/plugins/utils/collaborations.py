@@ -22,15 +22,6 @@ def get_collaboration_data(logged_user, filter_by_user=None):
     if count_types is None:
         populate_count_types = True
         count_types = OrderedDict()
-        # TODO: implement with superarchives
-        # visible_threads = get_visible_threads(logged_user, filter_by_user)
-        # count_types[_('Emails')] = len(visible_threads)
-
-    # TODO: implement with superarchives
-    # messages = get_visible_threads(logged_user, filter_by_user)
-    messages = []
-
-    latest_results.extend(messages)
 
     for app in settings.COLAB_APPS.values():
         module = importlib.import_module('{}.models'.format(app.get('name')))
