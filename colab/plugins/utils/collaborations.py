@@ -17,7 +17,6 @@ def get_collaboration_data(logged_user, filter_by_user=None):
     latest_results = []
     populate_count_types = False
 
-    messages = get_visible_threads(logged_user, filter_by_user)
 
     if count_types is None:
         populate_count_types = True
