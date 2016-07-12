@@ -8,7 +8,7 @@ REQUIREMENTS = [
     'django-hitcounter>=0.1.1',
 
     # Search
-    'django-haystack>=2.2',
+    'django-haystack>=2.2, <2.5',
     'Whoosh>=2.7.0',
 
     # revproxy
