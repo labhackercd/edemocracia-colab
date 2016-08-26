@@ -58,6 +58,7 @@ INSTALLED_APPS = (
     'haystack',
     'hitcounter',
     'taggit',
+    'social.apps.django_app.default',
 
     # Own apps
     'colab',
@@ -204,6 +205,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'colab.home.context_processors.ribbon',
     'colab.home.context_processors.google_analytics',
     'colab.accounts.context_processors.redirect_login',
+    'social.apps.django_app.context_processors.backends',
+    'social.apps.django_app.context_processors.login_redirect',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -223,8 +226,57 @@ MIDDLEWARE_CLASSES = (
 )
 
 AUTHENTICATION_BACKENDS = (
+    'social.backends.google.GoogleOAuth2',
+    'social.backends.facebook.Facebook2OAuth2',
     'django.contrib.auth.backends.ModelBackend',
 )
+
+# python-social-auth: http://psa.matiasaguirre.net/docs/index.html
+
+SOCIAL_AUTH_URL_NAMESPACE = 'social'
+
+SLUGIFY_USERNAMES = True
+
+SOCIAL_AUTH_PIPELINE = (
+    'social.pipeline.social_auth.social_details',
+    'social.pipeline.social_auth.social_uid',
+    'social.pipeline.social_auth.auth_allowed',
+    'social.pipeline.social_auth.social_user',
+    'social.pipeline.user.get_username',
+    'social.pipeline.social_auth.associate_by_email',
+    'social.pipeline.user.create_user',
+    'social.pipeline.social_auth.associate_user',
+    'social.pipeline.social_auth.load_extra_data',
+    'social.pipeline.user.user_details'
+)
+
+# Fill these with your application credentials in order to use social logins.
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
+
+SOCIAL_AUTH_FACEBOOK_KEY = ''
+SOCIAL_AUTH_FACEBOOK_SECRET = ''
+
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
+
+SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
+    'fields': 'id,name,first_name,last_name,email'
+}
+
+# Information about available social backends. I know this is not the
+# best place to put this kind of things, but what could one do?
+
+SOCIAL_BACKEND_INFO = {
+    'google-oauth2': {
+        'title': _('Google'),
+        'icon': 'img/sa-google-icon.png',
+    },
+    'facebook': {
+        'title': _('Facebook'),
+        'icon': 'img/sa-facebook-icon.png',
+    }
+}
 
 LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'locale'),

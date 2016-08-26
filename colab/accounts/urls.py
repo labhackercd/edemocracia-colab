@@ -1,5 +1,6 @@
 
-from django.conf.urls import patterns, url
+from django.conf.urls import patterns, url, include
+from django.conf import settings
 from django.contrib.auth import views as auth_views
 
 from colab.accounts.views import (UserProfileDetailView, UserProfileUpdateView,
@@ -42,6 +43,9 @@ urlpatterns = patterns('',
 
 urlpatterns += patterns('',
     url(r'^register/?$', 'colab.accounts.views.signup', name='signup'),
+
+    url(r'^social/', include('social.apps.django_app.urls',
+        namespace=settings.SOCIAL_AUTH_URL_NAMESPACE)),
 
     url(r'^(?P<username>[\w@+.-]+)/?$',
         UserProfileDetailView.as_view(), name='user_profile'),
