@@ -19,7 +19,10 @@ REQUIREMENTS = [
 
     # Acceptance tests
     'selenium>=2.53.1',
-    'behave_django>=0.3.0',
+    'behave_django<0.4.0',
+
+    # Social Login
+    'python-social-auth==0.2.21',
 
     ### Move out of colab (as plugins):
 
