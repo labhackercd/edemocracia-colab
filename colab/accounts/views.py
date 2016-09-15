@@ -119,7 +119,7 @@ class EmailView(View):
         user.save()
 
         messages.success(request, _('Email address verified!'))
-        return redirect('user_profile', username=email_val.user.username)
+        return redirect('/', username=email_val.user.username)
 
     @method_decorator(login_required)
     def post(self, request, key):
