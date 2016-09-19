@@ -95,7 +95,7 @@ def load_colab_apps():
     if not os.path.exists(plugins_dir):
         return {'COLAB_APPS': COLAB_APPS}
 
-    for file_name in os.listdir(plugins_dir):
+    for file_name in sorted(os.listdir(plugins_dir)):
         app_name = ""
         file_module = file_name.split('.')[0]
 

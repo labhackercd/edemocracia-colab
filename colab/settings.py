@@ -50,6 +50,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
 
     # First app to provide AUTH_USER_MODEL to others
     'colab.accounts',
@@ -72,6 +73,7 @@ INSTALLED_APPS = (
     'colab.signals',
     'colab.middlewares',
 )
+SITE_ID = 1
 
 ROOT_URLCONF = 'colab.urls'
 
