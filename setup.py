@@ -4,13 +4,13 @@ from setuptools import setup, find_packages
 
 REQUIREMENTS = [
     'Django>=1.7.10,<1.8',
-    'pytz>=2011n',
-    'django-hitcounter>=0.1.1',
+    'pytz==2011n',
+    'django-hitcounter==0.1.1',
     'python-social-auth',
 
     # Search
     'django-haystack>=2.2, <2.5',
-    'Whoosh>=2.7.0',
+    'Whoosh==2.7.0',
 
     # revproxy
     'django-revproxy[diazo]>=0.9.9',

@@ -8,15 +8,16 @@ class UserIndex(indexes.SearchIndex, indexes.Indexable):
     # common fields
     text = indexes.CharField(document=True, use_template=True, stored=False)
     url = indexes.CharField(model_attr='get_absolute_url', indexed=False)
-    title = indexes.CharField(model_attr='get_full_name')
+    title = indexes.EdgeNgramField(model_attr='get_full_name')
     description = indexes.CharField(null=True)
     type = indexes.CharField()
     icon_name = indexes.CharField()
 
     # extra fields
-    username = indexes.CharField(model_attr='username', stored=False)
-    name = indexes.CharField(model_attr='get_full_name')
-    email = indexes.CharField(model_attr='email', stored=False)
+    modified = indexes.EdgeNgramField(model_attr='modified', stored=False)
+    username = indexes.EdgeNgramField(model_attr='username', stored=False)
+    name = indexes.EdgeNgramField(model_attr='get_full_name')
+    email = indexes.EdgeNgramField(model_attr='email', stored=False)
     institution = indexes.CharField(model_attr='institution', null=True)
     role = indexes.CharField(model_attr='role', null=True)
     google_talk = indexes.CharField(model_attr='google_talk', null=True,

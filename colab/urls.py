@@ -29,6 +29,7 @@ if hasattr(settings, 'BLACKLIST'):
 urlpatterns += patterns(
     '',
     url(r'^$', RedirectView.as_view(url=settings.COLAB_HOME_URL), name='home'),
+    url(r'', include('colab.plugins.urls')),
     url(r'^robots.txt$', 'colab.home.views.robots', name='robots'),
     url(r'^dashboard$', 'colab.home.views.dashboard', name='dashboard'),
     url(r'^search/', include('colab.search.urls')),
@@ -40,5 +41,4 @@ urlpatterns += patterns(
 
     url(r'^colab/admin/', include(admin.site.urls)),
 
-    url(r'', include('colab.plugins.urls')),
 )
