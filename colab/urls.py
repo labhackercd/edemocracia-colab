@@ -39,6 +39,7 @@ urlpatterns += patterns(
     url(r'^myaccount/(?P<route>.*)$',
         'colab.accounts.views.myaccount_redirect', name='myaccount'),
 
+    url(r'^media/(.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
     url(r'^colab/admin/', include(admin.site.urls)),
 
 )
