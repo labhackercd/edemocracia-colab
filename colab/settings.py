@@ -233,7 +233,7 @@ MIDDLEWARE_CLASSES = (
 AUTHENTICATION_BACKENDS = (
     'social.backends.google.GoogleOAuth2',
     'social.backends.facebook.Facebook2OAuth2',
-    'django.contrib.auth.backends.ModelBackend',
+    'colab.accounts.backends.UsernameOrEmailBackend',
 )
 
 # python-social-auth: http://psa.matiasaguirre.net/docs/index.html
