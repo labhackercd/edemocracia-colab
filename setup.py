@@ -16,7 +16,7 @@ REQUIREMENTS = [
     'django-revproxy[diazo]>=0.9.9',
 
     # Async Signals
-    'celery[redis]>=3.1.2',
+    'celery[redis]==3.1.2',
 
     # Acceptance tests
     'selenium>=2.53.1',
