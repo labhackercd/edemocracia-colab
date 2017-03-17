@@ -4,9 +4,10 @@ from setuptools import setup, find_packages
 
 REQUIREMENTS = [
     'Django>=1.7.10,<1.8',
+    'django-taggit==0.21.3',
     'pytz==2011n',
     'django-hitcounter==0.1.1',
-    'python-social-auth',
+    'python-social-auth==0.2.21',
 
     # Search
     'django-haystack>=2.2, <2.5',
@@ -21,9 +22,6 @@ REQUIREMENTS = [
     # Acceptance tests
     'selenium>=2.53.1',
     'behave_django<0.4.0',
-
-    # Social Login
-    'python-social-auth==0.2.21',
 
     ### Move out of colab (as plugins):
 
