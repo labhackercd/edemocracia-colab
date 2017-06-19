@@ -35,6 +35,9 @@ class CustomUserAdmin(UserAdmin):
                        'email', 'password1', 'password2'),
         }),
     )
+    list_display = (
+        'username', 'email', 'date_joined', 'last_login', 'is_active')
+    list_filter = ('last_login', 'date_joined', 'is_active')
 
 
 admin.site.register(User, CustomUserAdmin)
