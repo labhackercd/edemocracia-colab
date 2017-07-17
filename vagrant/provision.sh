@@ -32,21 +32,16 @@ done
 pip install -e $basedir
 
 ### Create conf directory
-sudo mkdir -p /etc/colab
-sudo chown vagrant:vagrant /etc/colab
+sudo mkdir -p /etc/colab/widgets.d
+sudo mkdir -p /etc/colab/plugins.d
+sudo chown -R vagrant:vagrant /etc/colab
 
 if [ ! -s /etc/colab/settings.py ]; then
     colab-admin initconfig > /etc/colab/settings.py
     rm -f /etc/colab/settings.pyc  # remove pyc if exists
 fi
 
-if [ ! -s /etc/colab/widgets_settings.py ]; then
-    colab-admin initwidgetsconfig > /etc/colab/widgets_settings.py
-    rm -f /etc/colab/widgets_settings.pyc  # remove pyc if exists
-fi
-
-colab-admin migrate
-colab-admin loaddata /vagrant/tests/test_data.json
+# colab-admin migrate
 
 # Init.d Celery files
 sudo cp $basedir/vagrant/misc/etc/init.d/celery* /etc/init.d/
@@ -57,4 +52,13 @@ sleep 2
 sudo service celeryd start
 sudo service celerybeat start
 
-colab-admin rebuild_index --noinput
+PLUGINS_DIR=/colab-plugins
+
+if [ ! -d "$PLUGINS_DIR/edemocracia" ]; then
+  git clone https://github.com/labhackercd/colab-edemocracia-plugin.git $PLUGINS_DIR/edemocracia
+  pip install -e $PLUGINS_DIR/edemocracia
+  ln -s $PLUGINS_DIR/edemocracia/etc/colab/plugins.d/edemocracia.py /etc/colab/plugins.d/edemocracia.py
+fi
+
+sudo npm install -g bower
+colab-admin bower_install
