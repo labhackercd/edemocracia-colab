@@ -22,7 +22,7 @@ yum install -y epel-release
 
 yum -y groupinstall "Development tools"
 
-yum install -y git unzip gettext libxml2-devel libxslt-devel libjpeg-devel32 openssl-devel libffi-devel python-devel python-pip python-virtualenvwrapper redis nodejs
+yum install -y git unzip gettext libxml2-devel libxslt-devel libjpeg-devel32 libjpeg-devel openssl-devel libffi-devel python-devel python-pip python-virtualenvwrapper redis nodejs
 
 ### Acceptance Tests dependencies
 
