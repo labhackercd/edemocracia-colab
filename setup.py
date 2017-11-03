@@ -8,6 +8,7 @@ REQUIREMENTS = [
     'pytz==2011n',
     'django-hitcounter==0.1.1',
     'python-social-auth==0.2.21',
+    'python-decouple==3.1',
 
     # Search
     'django-haystack>=2.2, <2.5',
