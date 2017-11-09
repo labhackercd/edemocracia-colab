@@ -30,8 +30,12 @@ if [[ "$ENABLE_AUDIENCIAS" = true ]]; then
 fi
 
 crond
+
+PGPASSWORD=$DATABASE_PASSWORD psql -U $DATABASE_USER -w -h $DATABASE_HOST -c "CREATE DATABASE ${DATABASE_NAME} OWNER root"
 colab-admin migrate
 colab-admin initdb
+
 colab-admin compress --force
 colab-admin collectstatic --noinput
+
 gunicorn colab.wsgi:application --config=/etc/colab/gunicorn.py

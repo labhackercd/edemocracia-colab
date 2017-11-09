@@ -16,8 +16,6 @@ services:
 
   db:
     image: postgres
-    volumes:
-      - ./scripts/pgsql/create-databases.sh:/docker-entrypoint-initdb.d/create-databases.sh:z
     healthcheck:
       test: runuser postgres -c "pg_isready"
       interval: 10s
@@ -27,6 +25,9 @@ services:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root
       POSTGRES_DB: root
+      PGDATA : /var/lib/postgresql/data/
+    volumes:
+      - colab_data:/var/lib/postgresql/data/
 
   colab:
     image: labhackercd/edemocracia-colab
@@ -66,7 +67,6 @@ services:
       AUDIENCIAS_API_KEY: secret_key
       WIKILEGIS_API_KEY: api_key
     volumes:
-      - .:/var/labhacker/colab/colab
       - colab_assets:/var/labhacker/colab/public:z
     links:
       - 'audienciasweb'
