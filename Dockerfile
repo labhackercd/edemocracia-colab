@@ -6,7 +6,8 @@ ENV BUILD_PACKAGES python-dev python3 python3-dev linux-headers \
 
 RUN apk add --update --no-cache $BUILD_PACKAGES
 RUN mkdir -p /etc/colab /etc/colab/settings.d /etc/colab/plugins.d \
-    /etc/colab/widgets.d /var/labhacker/colab/public/media
+    /etc/colab/widgets.d /var/labhacker/colab/public/media \
+    /etc/cron.d/
 
 ADD . /var/labhacker/colab
 WORKDIR /var/labhacker/colab

@@ -61,6 +61,8 @@ services:
       SITE_NAME: Câmara dos Deputados
       SITE_LOGO: ''
       SITE_BACKGROUND_IMAGE: ''
+      ENABLE_AUDIENCIAS: 'true'
+      ENABLE_WIKILEGIS: 'true'
       AUDIENCIAS_API_KEY: secret_key
       WIKILEGIS_API_KEY: api_key
     volumes:
