@@ -40,6 +40,7 @@ COLAB_HOME_URL = '/home'
 LOGIN_URL = COLAB_HOME_URL
 
 STATIC_ROOT = '/var/labhacker/colab/public/static/'
+MEDIA_ROOT = '/var/labhacker/colab/public/media/'
 
 HAYSTACK_CONNECTIONS = {
     'default': {
