@@ -1,11 +1,10 @@
 version: '2.3'
 services:
   nginx:
-    image: nginx
+    image: labhackercd/nginx-edemocracia
     depends_on:
       - colab
     volumes:
-      - ./misc/etc/nginx/conf.d/:/etc/nginx/conf.d/:z
       - colab_assets:/var/labhacker/colab/public:z
       - audiencias:/var/labhacker/audiencias:z
       - wikilegis:/var/labhacker/wikilegis:z
@@ -13,6 +12,8 @@ services:
       - "8000:80"
     links:
       - 'audienciasweb'
+    environment:
+      NAME_RESOLVER: '127.0.0.11'
 
   db:
     image: postgres
@@ -73,8 +74,7 @@ services:
     expose:
       - "8000"
     depends_on:
-      db:
-        condition: service_healthy
+      - db
 
   redis:
     image: redis:alpine
@@ -128,10 +128,8 @@ services:
     expose:
       - "8000"
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - db
+      - redis
 
   audienciasworker:
     image: labhackercd/audiencias-publicas
@@ -177,7 +175,7 @@ services:
       - 'audienciasweb'
 
   wikilegisweb:
-    image: labhackercd/wikilegis
+    image: labhackercd/wikilegis:1.3.0
     command: ./start.sh
     restart: on-failure
     links:
@@ -221,10 +219,11 @@ services:
     expose:
       - "8000"
     depends_on:
-      db:
-        condition: service_healthy
+      - db
 
 volumes:
+  colab_data:
+    driver: local
   colab_assets:
     driver: local
   audiencias:
