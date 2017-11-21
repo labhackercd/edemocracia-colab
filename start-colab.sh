@@ -2,7 +2,7 @@
 
 PLUGINS_SETTINGS="/etc/colab/plugins.d/"
 if [ "$(ls -A $PLUGINS_SETTINGS)" ]; then
-    find $PLUGINS_SETTINGS ! -name 'edemocracia.py' -type f -exec rm -f {} +
+    find $PLUGINS_SETTINGS ! -name 'edemocracia.py' ! -name 'tos.py' -type f -exec rm -f {} +
 fi
 
 PLUGINS_WIDGETS="/etc/colab/widgets.d/"
@@ -44,6 +44,7 @@ PGPASSWORD=$DATABASE_PASSWORD psql -U $DATABASE_USER -w -h $DATABASE_HOST -c "CR
 colab-admin migrate
 colab-admin initdb
 
+colab-admin bower_install --allow-root
 colab-admin compress --force
 colab-admin collectstatic --noinput
 
