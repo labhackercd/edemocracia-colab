@@ -13,8 +13,8 @@ class Command(BaseCommand):
     help = ('Create admin and set site domain')
 
     def handle(self, *args, **kwargs):
-        self.create_admin()
         self.set_site_domain()
+        self.create_admin()
 
     def set_site_domain(self):
         site = Site.objects.get_current()

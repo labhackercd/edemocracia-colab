@@ -20,6 +20,7 @@ activate_plugin() {
 
 [[ -z "${ENABLE_AUDIENCIAS}" ]] && ENABLE_AUDIENCIAS=2 || ENABLE_AUDIENCIAS="${ENABLE_AUDIENCIAS}"
 [[ -z "${ENABLE_WIKILEGIS}" ]] && ENABLE_WIKILEGIS=2 || ENABLE_WIKILEGIS="${ENABLE_WIKILEGIS}"
+[[ -z "${ENABLE_DISCOURSE}" ]] && ENABLE_DISCOURSE=2 || ENABLE_DISCOURSE="${ENABLE_DISCOURSE}"
 
 if [[ "$ENABLE_WIKILEGIS" = true ]]; then
     activate_plugin wikilegis
@@ -27,6 +28,10 @@ fi
 
 if [[ "$ENABLE_AUDIENCIAS" = true ]]; then
     activate_plugin audiencias
+fi
+
+if [[ "$ENABLE_DISCOURSE" = true ]]; then
+    activate_plugin discourse
 fi
 
 crond

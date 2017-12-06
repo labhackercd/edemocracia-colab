@@ -8,6 +8,7 @@ services:
       - colab_assets:/var/labhacker/colab/public:z
       - audiencias:/var/labhacker/audiencias:z
       - wikilegis:/var/labhacker/wikilegis:z
+      - discourse:/var/www/discourse:z
     ports:
       - "8000:80"
     links:
@@ -16,17 +17,16 @@ services:
       NAME_RESOLVER: '127.0.0.11'
 
   db:
-    image: postgres
+    image: postgres:9.6
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root
       POSTGRES_DB: root
       PGDATA : /var/lib/postgresql/data/
     volumes:
-      - colab_data:/var/lib/postgresql/data/
+      - pg_data:/var/lib/postgresql/data/
 
   colab:
-    # build: .
     image: labhackercd/edemocracia-colab
     command: ./start-colab.sh
     environment:
@@ -61,8 +61,12 @@ services:
       SITE_BACKGROUND_IMAGE: ''
       ENABLE_AUDIENCIAS: 'true'
       ENABLE_WIKILEGIS: 'true'
+      ENABLE_DISCOURSE: 'true'
       AUDIENCIAS_API_KEY: secret_key
       WIKILEGIS_API_KEY: api_key
+      DISCOURSE_API_KEY: api_key
+      DISCOURSE_API_USERNAME: system
+      DISCOURSE_SSO_SECRET: sso_secret
     volumes:
       - colab_assets:/var/labhacker/colab/public:z
     links:
@@ -111,7 +115,12 @@ services:
       ADMIN_PASSWORD: 123
       ADMIN_EMAIL: email@admin.com
       ADMIN_USERNAME: admin
-      DATABASE_URL: postgres://root:root@db:5432/audiencias
+      DATABASE_ENGINE: postgresql_psycopg2
+      DATABASE_NAME: audiencias
+      DATABASE_PASSWORD: root
+      DATABASE_USER: root
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
       DEBUG: 'False'
       REDIS_SERVER: redis
       WEBSERVICE_URL: https://infoleg.camara.leg.br/ws-pauta/evento/interativo
@@ -155,7 +164,12 @@ services:
       ADMIN_PASSWORD: 123
       ADMIN_EMAIL: email@admin.com
       ADMIN_USERNAME: admin
-      DATABASE_URL: postgres://root:root@db:5432/audiencias
+      DATABASE_ENGINE: postgresql_psycopg2
+      DATABASE_NAME: audiencias
+      DATABASE_PASSWORD: root
+      DATABASE_USER: root
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
       DEBUG: 'False'
       REDIS_SERVER: redis
       WEBSERVICE_URL: https://infoleg.camara.leg.br/ws-pauta/evento/interativo
@@ -212,10 +226,85 @@ services:
     depends_on:
       - db
 
+  discourse:
+    image: labhackercd/discourse-docker
+    command: ./start-web.sh
+    volumes:
+      - discourse:/var/www/discourse
+    expose:
+      - "8080"
+    depends_on:
+      - db
+      - redis
+      - sidekiq
+    environment:
+      RAILS_ENV: 'production'
+      DISCOURSE_DB_HOST: db
+      DISCOURSE_DB_PORT: '5432'
+      DISCOURSE_DB_NAME: 'root'
+      DISCOURSE_DB_USERNAME: 'root'
+      DISCOURSE_DB_PASSWORD: 'root'
+      DISCOURSE_HOSTNAME: 'localhost'
+      DISCOURSE_SMTP_ADDRESS: smtp.gmail.com
+      DISCOURSE_SMTP_PORT: 587
+      DISCOURSE_SMTP_USER_NAME: 'matheuzin@gmail.com'
+      DISCOURSE_SMTP_PASSWORD: '19930113'
+      DISCOURSE_DEVELOPER_EMAILS: 'matheus.souza.fernandes@gmail.com'
+      DISCOURSE_REDIS_HOST: 'redis'
+      DISCOURSE_REDIS_PORT: 6379
+      DISCOURSE_RELATIVE_URL_ROOT: '/expressao'
+      DISCOURSE_CONTACT_EMAIL: 'matheuzin@gmail.com'
+      DISCOURSE_CONTACT_URL: 'localhost'
+      DISCOURSE_NOTIFICATION_EMAIL: 'noreply@dicourse.org'
+      DISCOURSE_LOGO_URL: '\/images\/d-logo-sketch.png'
+      DISCOURSE_SMALL_LOGO_URL: '\/images\/d-logo-sketch-small.png'
+      DISCOURSE_FAVICON_URL: '\/images\/default-favicon.ico'
+      DISCOURSE_APPLE_TOUCH_ICON_URL: '\/images\/default-apple-touch-icon.png'
+      DISCOURSE_SSO_URL: 'http:\/\/127.0.0.1:8000'
+      DISCOURSE_SSO_SECRET: 'sso_secret'
+      DISCOURSE_FORCE_HOSTNAME: ''
+
+  sidekiq:
+    image: labhackercd/discourse-docker
+    command: './start-sidekiq.sh'
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - discourse:/var/www/discourse
+    environment:
+      RAILS_ENV: 'production'
+      DISCOURSE_DB_HOST: db
+      DISCOURSE_DB_PORT: '5432'
+      DISCOURSE_DB_NAME: 'root'
+      DISCOURSE_DB_USERNAME: 'root'
+      DISCOURSE_DB_PASSWORD: 'root'
+      DISCOURSE_HOSTNAME: 'localhost'
+      DISCOURSE_SMTP_ADDRESS: smtp.gmail.com
+      DISCOURSE_SMTP_PORT: 587
+      DISCOURSE_SMTP_USER_NAME: 'matheuzin@gmail.com'
+      DISCOURSE_SMTP_PASSWORD: '19930113'
+      DISCOURSE_DEVELOPER_EMAILS: 'matheus.souza.fernandes@gmail.com'
+      DISCOURSE_REDIS_HOST: 'redis'
+      DISCOURSE_REDIS_PORT: 6379
+      DISCOURSE_RELATIVE_URL_ROOT: '/expressao'
+      DISCOURSE_CONTACT_EMAIL: 'matheuzin@gmail.com'
+      DISCOURSE_CONTACT_URL: 'localhost'
+      DISCOURSE_NOTIFICATION_EMAIL: 'noreply@dicourse.org'
+      DISCOURSE_LOGO_URL: '\/images\/d-logo-sketch.png'
+      DISCOURSE_SMALL_LOGO_URL: '\/images\/d-logo-sketch-small.png'
+      DISCOURSE_FAVICON_URL: '\/images\/default-favicon.ico'
+      DISCOURSE_APPLE_TOUCH_ICON_URL: '\/images\/default-apple-touch-icon.png'
+      DISCOURSE_SSO_URL: 'http:\/\/127.0.0.1:8000'
+      DISCOURSE_SSO_SECRET: 'sso_secret'
+      DISCOURSE_FORCE_HOSTNAME: ''
+
 volumes:
-  colab_data:
+  pg_data:
     driver: local
   colab_assets:
+    driver: local
+  discourse:
     driver: local
   audiencias:
     driver: local
