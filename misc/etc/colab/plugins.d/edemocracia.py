@@ -13,7 +13,7 @@ urls = {
 middlewares = ['colab_edemocracia.middlewares.ForceLangMiddleware']
 
 dependencies = ['djangobower', 'compressor', 'easy_thumbnails',
-                'image_cropping', 'widget_tweaks', 'macros']
+                'image_cropping', 'widget_tweaks', 'macros', 'rest_framework']
 
 context_processors = ['colab_edemocracia.processors.recaptcha_site_key',
                       'colab_edemocracia.processors.home_customization']
@@ -48,4 +48,12 @@ settings_variables = {
     'RECAPTCHA_PRIVATE_KEY': config('RECAPTCHA_PRIVATE_KEY', default=''),
     'SITE_NAME': config('SITE_NAME', default='Nome do site'),
     'SITE_LOGO': config('SITE_LOGO', default='https://exemple.com/img.png'),
+    'COMPRESS_ENABLED': True,
+    'COMPRESS_OFFLINE': True,
+    'REST_FRAMEWORK': {
+        'DEFAULT_RENDERER_CLASSES': (
+            'rest_framework.renderers.JSONRenderer',
+        ),
+        'PAGE_SIZE': 20
+    },
 }
