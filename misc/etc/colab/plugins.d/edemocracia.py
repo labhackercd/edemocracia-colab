@@ -37,6 +37,9 @@ settings_variables = {
     ),
     'LIBSASS_SOURCEMAPS': 'DEBUG',
     'COMPRESS_ROOT': "/usr/lib/python2.7/site-packages/colab_edemocracia/static",
+    'COMPRESS_NODE_MODULES': "/usr/lib/python2.7/site-packages/colab_edemocracia/node_modules",
+    "COMPRESS_NODE_SASS_BIN": "/usr/lib/python2.7/site-packages/colab_edemocracia/node_modules/.bin/node-sass",
+    "COMPRESS_POSTCSS_BIN": "/usr/lib/python2.7/site-packages/colab_edemocracia/node_modules/.bin/postcss",
     'COLAB_TEMPLATES': (
         "/usr/lib/python2.7/site-packages/colab_edemocracia/templates",
     ),

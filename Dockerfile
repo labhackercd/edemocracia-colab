@@ -18,6 +18,10 @@ RUN pip install . psycopg2 gunicorn elasticsearch python-memcached easy_thumbnai
 RUN pip install colab-edemocracia colab-audiencias colab-discourse \
     colab-wikilegis colab-mkdocs-tos
 
+WORKDIR /usr/lib/python2.7/site-packages/colab_edemocracia
+RUN npm install
+WORKDIR /var/labhacker/colab
+
 COPY ./misc/etc/colab/settings.py ./misc/etc/colab/gunicorn.py /etc/colab/
 COPY ./misc/etc/colab/settings.d/01-database.py \
      ./misc/etc/colab/settings.d/02-memcached.py \
