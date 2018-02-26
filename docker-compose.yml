@@ -3,19 +3,18 @@ services:
   nginx:
     image: labhackercd/nginx-edemocracia
     depends_on:
-      - colab
+     - colab
     volumes:
-      - colab_assets:/var/labhacker/colab/public:z
-      - audiencias:/var/labhacker/audiencias:z
-      - wikilegis:/var/labhacker/wikilegis:z
-      - discourse:/var/www/discourse:z
+     - colab_assets:/var/labhacker/colab/public:z
+     - audiencias:/var/labhacker/audiencias:z
+     - wikilegis:/var/labhacker/wikilegis:z
     ports:
-      - "8000:80"
+     - "8000:80"
     links:
-      - 'audienciasweb'
+     - 'audienciasweb'
     environment:
       NAME_RESOLVER: '127.0.0.11'
-
+ 
   db:
     image: postgres:9.6
     environment:
@@ -24,10 +23,10 @@ services:
       POSTGRES_DB: root
       PGDATA : /var/lib/postgresql/data/
     volumes:
-      - pg_data:/var/lib/postgresql/data/
-
+     - pg_data:/var/lib/postgresql/data/
+ 
   colab:
-    image: labhackercd/edemocracia-colab
+    image: labhackercd/edemocracia-colab:1.15.5
     command: ./start-colab.sh
     environment:
       DEBUG: 'True'
@@ -47,6 +46,8 @@ services:
       SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET: ''
       SOCIAL_AUTH_FACEBOOK_KEY: ''
       SOCIAL_AUTH_FACEBOOK_SECRET: ''
+      RECAPTCHA_SITE_KEY: ''
+      RECAPTCHA_PRIVATE_KEY: ''
       DATABASE_HOST: 'db'
       DATABASE_NAME: 'colab'
       DATABASE_USER: 'root'
@@ -58,36 +59,31 @@ services:
       SITE_DOMAIN: http://127.0.0.1:8000
       SITE_NAME: Câmara dos Deputados
       SITE_LOGO: ''
-      SITE_BACKGROUND_IMAGE: ''
-      ENABLE_AUDIENCIAS: 'true'
-      ENABLE_WIKILEGIS: 'true'
-      ENABLE_DISCOURSE: 'true'
+      ENABLE_AUDIENCIAS: 'false'
+      ENABLE_WIKILEGIS: 'false'
       AUDIENCIAS_API_KEY: secret_key
       WIKILEGIS_API_KEY: api_key
-      DISCOURSE_API_KEY: api_key
-      DISCOURSE_API_USERNAME: system
-      DISCOURSE_SSO_SECRET: sso_secret
     volumes:
-      - colab_assets:/var/labhacker/colab/public:z
+     - colab_assets:/var/labhacker/colab/public:z
     links:
-      - 'audienciasweb'
+     - 'audienciasweb'
     expose:
-      - "8000"
+     - "8000"
     depends_on:
-      - db
-
+     - db
+ 
   redis:
     image: redis:alpine
-
+ 
   audienciasweb:
-    image: labhackercd/audiencias-publicas
+    image: labhackercd/audiencias-publicas:1.2.1
     command: ./start-web.sh
     restart: on-failure
     links:
-      - db
-      - redis
+     - db
+     - redis
     volumes:
-      - audiencias:/var/labhacker/audiencias
+     - audiencias:/var/labhacker/audiencias
     environment:
       EMAIL_HOST: ''
       EMAIL_HOST_USER: ''
@@ -125,18 +121,20 @@ services:
       REDIS_SERVER: redis
       WEBSERVICE_URL: https://infoleg.camara.leg.br/ws-pauta/evento/interativo
       COMPRESS_OFFLINE: 'True'
+      SITE_DOMAIN: http://127.0.0.1:8000
+      SITE_NAME: Câmara dos Deputados
     expose:
-      - "8000"
+     - "8000"
     depends_on:
-      - db
-      - redis
-
+     - db
+     - redis
+ 
   audienciasworker:
-    image: labhackercd/audiencias-publicas
+    image: labhackercd/audiencias-publicas:1.2.1
     command: ./start-worker.sh
     links:
-      - redis
-      - db
+     - redis
+     - db
     environment:
       EMAIL_HOST: ''
       EMAIL_HOST_USER: ''
@@ -174,19 +172,21 @@ services:
       REDIS_SERVER: redis
       WEBSERVICE_URL: https://infoleg.camara.leg.br/ws-pauta/evento/interativo
       COMPRESS_OFFLINE: 'True'
+      SITE_DOMAIN: http://127.0.0.1:8000
+      SITE_NAME: Câmara dos Deputados
     volumes:
-      - audiencias:/var/labhacker/audiencias
+     - audiencias:/var/labhacker/audiencias
     depends_on:
-      - 'audienciasweb'
-
+     - 'audienciasweb'
+ 
   wikilegisweb:
-    image: labhackercd/wikilegis
+    image: labhackercd/wikilegis:1.3.3
     command: ./start.sh
     restart: on-failure
     links:
-      - db
+     - db
     volumes:
-      - wikilegis:/var/labhacker/wikilegis
+     - wikilegis:/var/labhacker/wikilegis
     environment:
       API_KEY: api_key
       SECRET_KEY: secret_key
@@ -221,90 +221,17 @@ services:
       DATABASE_HOST: db
       DATABASE_PORT: 5432
       DEBUG: 'False'
+      SITE_DOMAIN: http://127.0.0.1:8000
+      SITE_NAME: Câmara dos Deputados
     expose:
-      - "8000"
+     - "8000"
     depends_on:
-      - db
-
-  discourse:
-    image: labhackercd/discourse-docker
-    command: ./start-web.sh
-    volumes:
-      - discourse:/var/www/discourse
-    expose:
-      - "8080"
-    depends_on:
-      - db
-      - redis
-      - sidekiq
-    environment:
-      RAILS_ENV: 'production'
-      DISCOURSE_DB_HOST: db
-      DISCOURSE_DB_PORT: '5432'
-      DISCOURSE_DB_NAME: 'root'
-      DISCOURSE_DB_USERNAME: 'root'
-      DISCOURSE_DB_PASSWORD: 'root'
-      DISCOURSE_HOSTNAME: 'localhost'
-      DISCOURSE_SMTP_ADDRESS: smtp.gmail.com
-      DISCOURSE_SMTP_PORT: 587
-      DISCOURSE_SMTP_USER_NAME: 'matheuzin@gmail.com'
-      DISCOURSE_SMTP_PASSWORD: '19930113'
-      DISCOURSE_DEVELOPER_EMAILS: 'matheus.souza.fernandes@gmail.com'
-      DISCOURSE_REDIS_HOST: 'redis'
-      DISCOURSE_REDIS_PORT: 6379
-      DISCOURSE_RELATIVE_URL_ROOT: '/expressao'
-      DISCOURSE_CONTACT_EMAIL: 'matheuzin@gmail.com'
-      DISCOURSE_CONTACT_URL: 'localhost'
-      DISCOURSE_NOTIFICATION_EMAIL: 'noreply@dicourse.org'
-      DISCOURSE_LOGO_URL: '\/images\/d-logo-sketch.png'
-      DISCOURSE_SMALL_LOGO_URL: '\/images\/d-logo-sketch-small.png'
-      DISCOURSE_FAVICON_URL: '\/images\/default-favicon.ico'
-      DISCOURSE_APPLE_TOUCH_ICON_URL: '\/images\/default-apple-touch-icon.png'
-      DISCOURSE_SSO_URL: 'http:\/\/127.0.0.1:8000'
-      DISCOURSE_SSO_SECRET: 'sso_secret'
-      DISCOURSE_FORCE_HOSTNAME: ''
-
-  sidekiq:
-    image: labhackercd/discourse-docker
-    command: './start-sidekiq.sh'
-    depends_on:
-      - db
-      - redis
-    volumes:
-      - discourse:/var/www/discourse
-    environment:
-      RAILS_ENV: 'production'
-      DISCOURSE_DB_HOST: db
-      DISCOURSE_DB_PORT: '5432'
-      DISCOURSE_DB_NAME: 'root'
-      DISCOURSE_DB_USERNAME: 'root'
-      DISCOURSE_DB_PASSWORD: 'root'
-      DISCOURSE_HOSTNAME: 'localhost'
-      DISCOURSE_SMTP_ADDRESS: smtp.gmail.com
-      DISCOURSE_SMTP_PORT: 587
-      DISCOURSE_SMTP_USER_NAME: 'matheuzin@gmail.com'
-      DISCOURSE_SMTP_PASSWORD: '19930113'
-      DISCOURSE_DEVELOPER_EMAILS: 'matheus.souza.fernandes@gmail.com'
-      DISCOURSE_REDIS_HOST: 'redis'
-      DISCOURSE_REDIS_PORT: 6379
-      DISCOURSE_RELATIVE_URL_ROOT: '/expressao'
-      DISCOURSE_CONTACT_EMAIL: 'matheuzin@gmail.com'
-      DISCOURSE_CONTACT_URL: 'localhost'
-      DISCOURSE_NOTIFICATION_EMAIL: 'noreply@dicourse.org'
-      DISCOURSE_LOGO_URL: '\/images\/d-logo-sketch.png'
-      DISCOURSE_SMALL_LOGO_URL: '\/images\/d-logo-sketch-small.png'
-      DISCOURSE_FAVICON_URL: '\/images\/default-favicon.ico'
-      DISCOURSE_APPLE_TOUCH_ICON_URL: '\/images\/default-apple-touch-icon.png'
-      DISCOURSE_SSO_URL: 'http:\/\/127.0.0.1:8000'
-      DISCOURSE_SSO_SECRET: 'sso_secret'
-      DISCOURSE_FORCE_HOSTNAME: ''
-
+     - db
+ 
 volumes:
   pg_data:
     driver: local
   colab_assets:
-    driver: local
-  discourse:
     driver: local
   audiencias:
     driver: local
